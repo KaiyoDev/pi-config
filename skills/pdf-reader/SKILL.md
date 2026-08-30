@@ -1,126 +1,126 @@
 ---
 name: pdf-reader
-description: Read and comprehend PDF files, especially math lecture notes and academic papers. Use when the user asks to read, parse, analyze, or extract content from a PDF file.
+description: Đọc và hiểu PDF files, đặc biệt là math lecture notes và academic papers. Dùng khi user hỏi đọc, parse, analyze, hoặc extract content từ PDF file.
 ---
 
 # PDF Reader
 
-Read and comprehend PDF files, especially math lecture notes and academic papers. Uses a hybrid text extraction + vision approach for maximum comprehension of equations, diagrams, and structured content.
+Đọc và hiểu PDF files, đặc biệt là math lecture notes và academic papers. Dùng hybrid text extraction + vision approach cho maximum comprehension của equations, diagrams, và structured content.
 
 ## Setup
 
-All scripts use a venv at `SKILL_DIR/.venv` with `pymupdf` installed. If the venv is missing, create it from `requirements.txt`:
+Tất cả scripts dùng venv tại `SKILL_DIR/.venv` với `pymupdf` installed. Nếu venv missing, tạo nó từ `requirements.txt`:
 
 ```bash
 python3 -m venv SKILL_DIR/.venv
 SKILL_DIR/.venv/bin/pip install -r SKILL_DIR/requirements.txt
 ```
 
-**Python command:** Always invoke scripts with:
+**Lệnh Python:** Luôn invoke scripts với:
 ```
 SKILL_DIR/.venv/bin/python SKILL_DIR/scripts/<script>.py [args]
 ```
 
 ## Scripts
 
-All scripts are in `SKILL_DIR/scripts/`.
+Tất cả scripts trong `SKILL_DIR/scripts/`.
 
 | Script | Purpose | Key args |
 |---|---|---|
 | `pdf_info.py <path>` | Metadata + per-page analysis (page count, TOC, text density, math density, image count) | — |
 | `pdf_extract.py <path> [--pages SPEC]` | Extract text by page | `--pages all\|1-5\|1,3,7\|3` |
-| `pdf_render.py <path> [--pages SPEC] [--dpi N]` | Render pages to PNG images in `/tmp/pi-pdf-*/` | `--pages`, `--dpi` (default 150) |
-| `pdf_search.py <path> <query> [--context N] [--literal]` | Search text content by regex or literal | `--context` lines (default 3), `--literal` flag |
+| `pdf_render.py <path> [--pages SPEC] [--dpi N]` | Render pages to PNG images trong `/tmp/pi-pdf-*/` | `--pages`, `--dpi` (default 150) |
+| `pdf_search.py <path> <query> [--context N] [--literal]` | Search text content bởi regex hoặc literal | `--context` lines (default 3), `--literal` flag |
 
 Page specs: `all`, `1-5`, `1,3,7`, `3` (1-indexed, inclusive ranges).
 
-## Strategy: How to Read a PDF
+## Strategy: Cách đọc PDF
 
-### Step 1: Always Triage First
+### Bước 1: Luôn Triage Trước
 
-Run `pdf_info.py` on every new PDF before doing anything else. This tells you:
-- How many pages (determines strategy)
-- Whether there's a TOC (enables structural navigation)
-- Per-page math density and image count (identifies which pages need vision)
-- Per-page text length (spots pages that are mostly diagrams/figures)
+Chạy `pdf_info.py` trên mọi PDF mới trước khi làm gì. Cái này cho bạn biết:
+- Bao nhiêu pages (quyết định strategy)
+- Có TOC không (enable structural navigation)
+- Per-page math density và image count (identifies pages cần vision)
+- Per-page text length (spots pages mostly diagrams/figures)
 
-### Step 2: Pick a Strategy Based on Size and Content
+### Bước 2: Chọn Strategy Dựa trên Size và Content
 
-#### Short PDFs (≤15 pages)
+#### PDFs ngắn (≤15 pages)
 - Extract all text: `pdf_extract.py <path>`
 - Render all pages: `pdf_render.py <path>`
-- Read all rendered images with the `read` tool for full visual comprehension
-- This gives complete understanding at reasonable token cost
+- Đọc tất cả rendered images với `read` tool cho full visual comprehension
+- Cái này cho hiểu biết complete ở reasonable token cost
 
-#### Medium PDFs (15–60 pages)
-- Extract all text first (cheap, gives structural overview)
-- Check `pdf_info.py` output for pages with high `math_density` (>0.02) or `image_count` > 0 or low `text_length` (<100, likely diagram-only pages)
-- Render only those math/diagram-heavy pages as images
-- Read those images with `read` for equation and figure comprehension
-- For the rest, text extraction is sufficient
+#### PDFs trung bình (15–60 pages)
+- Extract all text trước (cheap, cho structural overview)
+- Check `pdf_info.py` output cho pages với high `math_density` (>0.02) hoặc `image_count` > 0 hoặc low `text_length` (<100, likely diagram-only pages)
+- Render chỉ那些 math/diagram-heavy pages làm images
+- Đọc những images đó với `read` cho equation và figure comprehension
+- Với phần còn lại, text extraction đủ
 
-#### Long PDFs (60+ pages)
-- Extract text for a structural overview — focus on TOC and section headers
-- Do NOT render all pages (too many tokens)
-- For targeted questions: use `pdf_search.py` to find relevant pages, then render those
-- For full comprehension: work section by section, summarizing as you go
-- Warn the user about scope — offer to focus on specific sections
+#### PDFs dài (60+ pages)
+- Extract text cho structural overview — tập trung vào TOC và section headers
+- KHÔNG render tất cả pages (quá nhiều tokens)
+- Cho targeted questions: dùng `pdf_search.py` để find relevant pages, sau đó render那些
+- Cho full comprehension: làm section by section, summarizing как bạn go
+- Warn user về scope — offer để focus на specific sections
 
-### Step 3: Targeted Lookups
+### Bước 3: Targeted Lookups
 
-When the user asks about something specific (e.g., "check theorem 3.2", "what's on page 7"):
-1. `pdf_search.py <path> "theorem 3.2"` — find the page
+Khi user hỏi cái gì đó specific (vd, "check theorem 3.2", "trang 7 nói gì"):
+1. `pdf_search.py <path> "theorem 3.2"` — find page
 2. `pdf_render.py <path> --pages <page>` — render just that page
-3. `read` the image — see the actual theorem with proper math rendering
-4. If context is needed, extract text from surrounding pages
+3. `read` the image — see actual theorem với proper math rendering
+4. Nếu cần context, extract text từ surrounding pages
 
-### Step 4: Visual Reading Guidelines
+### Bước 4: Visual Reading Guidelines
 
-When reading rendered page images:
-- **150 DPI** (default) is good for most math and text
-- **200 DPI** if equations are small, dense, or hard to read at 150
-- **100 DPI** only for quick structural scanning (saves tokens)
-- State equations explicitly in your response using LaTeX notation when discussing them
-- Describe diagrams and figures in detail — the user may not be looking at the PDF simultaneously
-- Note page numbers when referencing content so the user can find it
+Khi đọc rendered page images:
+- **150 DPI** (mặc định) tốt cho most math和text
+- **200 DPI** nếu equations nhỏ, dense, hoặc khó đọc tại 150
+- **100 DPI** chỉ cho quick structural scanning (tiết kiệm tokens)
+- State equations explicitly trong response sử dụng LaTeX notation khi discussing chúng
+- Describe diagrams và figures chi tiết — user có thể không nhìn PDF đồng thời
+- Note page numbers khi referencing content để user có thể find nó
 
-### Step 5: What to Watch For
+### Bước 5: Những gì cần watch for
 
-- **Pages with low text_length but high image_count**: likely full-page diagrams or figures — always render these
-- **Pages with high math_density**: equations that text extraction will mangle — always render these
-- **Pages with decent text but zero math**: text extraction alone is fine, skip rendering
-- **TOC entries**: use these to navigate structurally rather than reading linearly
+- **Pages với low text_length nhưng high image_count**: likely full-page diagrams hoặc figures — luôn render những cái này
+- **Pages với high math_density**: equations mà text extraction sẽ mangle — luôn render những cái này
+- **Pages với decent text nhưng zero math**: text extraction alone đủ, skip rendering
+- **TOC entries**: dùng những cái này để navigate structurally thay vì đọc linearly
 
 ## Common Patterns
 
-### "Read this PDF" (full document)
+### "Đọc PDF này" (full document)
 ```
-1. pdf_info.py → assess size and content
-2. Pick strategy (short/medium/long)
+1. pdf_info.py → assess size và content
+2. Chọn strategy (short/medium/long)
 3. Extract text + selectively render
-4. Provide summary with key findings
+4. Provide summary với key findings
 ```
 
-### "What does theorem X say?"
+### "Theorem X nói gì?"
 ```
-1. pdf_search.py → find the page
-2. pdf_render.py → render that page (and maybe the next for proof continuation)
-3. Read the image, state the theorem precisely
-```
-
-### "Explain the proof on page N"
-```
-1. pdf_render.py --pages N → render the page
-2. Read the image for full visual comprehension
-3. Also extract text from pages N-1 and N+1 for surrounding context
-4. Walk through the proof step by step
+1. pdf_search.py → find page
+2. pdf_render.py → render page đó
+3. Đọc image, state theorem precisely
 ```
 
-### "Summarize this paper"
+### "Giải thích proof trên trang N"
 ```
-1. pdf_info.py → get TOC and page count
+1. pdf_render.py --pages N → render page
+2. Đọc image cho full visual comprehension
+3. Cũng extract text từ pages N-1 và N+1 cho surrounding context
+4. Walk through proof step by step
+```
+
+### "Tóm tắt paper này"
+```
+1. pdf_info.py → get TOC và page count
 2. pdf_extract.py → full text extraction
-3. Read abstract, intro, conclusion first (text is usually sufficient)
-4. Render figures/theorem pages as needed for deeper understanding
+3. Đọc abstract, intro, conclusion trước (text thường đủ)
+4. Render figures/theorem pages как needed cho deeper understanding
 5. Provide structured summary
 ```

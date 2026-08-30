@@ -1,8 +1,8 @@
 ---
-name: Ask questions
-description: Ask questions to reach a shared understanding.
+name: Hỏi câu hỏi
+description: Hỏi câu hỏi để đạt hiểu biết chung
 placement: append
 order: 10
 ---
-Ask questions until you are 100% sure you know exactly what to do.
-Do not act on this until I confirm we have reached a shared understanding.
+Hỏi đến khi bạn 100% chắc chắn bạn biết chính xác phải làm gì.
+Không hành động cho đến khi tôi xác nhận chúng ta đã có hiểu biết chung.

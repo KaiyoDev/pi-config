@@ -1,42 +1,42 @@
-# Phrases to Remove
+# Phrases cần Xóa
 
 ## Throat-Clearing Openers
 
-Remove these announcement phrases. State the content directly.
+Xóa những announcement phrases này. State content trực tiếp.
 
-- "Here's the thing:"
-- "Here's what [X]"
-- "Here's this [X]"
-- "Here's that [X]"
-- "Here's why [X]"
-- "The uncomfortable truth is"
+- "Đây là thing:"
+- "Đây là what [X]"
+- "Đây là this [X]"
+- "Đây là that [X]"
+- "Đây là why [X]"
+- "The uncomfortable truth là"
 - "It turns out"
-- "The real [X] is"
+- "The real [X] là"
 - "Let me be clear"
-- "The truth is,"
-- "I'll say it again:"
-- "I'm going to be honest"
+- "The truth là,"
+- "Tôi sẽ nói lại:"
+- "Tôi đang going to be honest"
 - "Can we talk about"
-- "Here's what I find interesting"
-- "Here's the problem though"
+- "Đây là what I find interesting"
+- "Đây là problem though"
 
-Any "here's what/this/that" construction is throat-clearing before the point. Cut it and state the point.
+Bất kỳ "here's what/this/that" construction nào là throat-clearing trước point. Cut nó và state point.
 
 ## Emphasis Crutches
 
-These add no meaning. Delete them.
+Những cái này thêm không meaning. Delete chúng.
 
 - "Full stop." / "Period."
 - "Let that sink in."
-- "This matters because"
+- "Cái này matters vì"
 - "Make no mistake"
-- "Here's why that matters"
+- "Đây là why that matters"
 
 ## Business Jargon
 
-Replace with plain language.
+Thay thế bằng plain language.
 
-| Avoid | Use instead |
+| Tránh | Dùng thay thế |
 |-------|-------------|
 | Navigate (challenges) | Handle, address |
 | Unpack (analysis) | Explain, examine |
@@ -52,7 +52,7 @@ Replace with plain language.
 
 ## Adverbs
 
-Kill all adverbs. No -ly words. No softeners, no intensifiers, no hedges.
+Giết все adverbs. Không -ly words. Không softeners, không intensifiers, không hedges.
 
 Specific offenders:
 
@@ -72,57 +72,57 @@ Specific offenders:
 - "importantly"
 - "crucially"
 
-Also cut these filler phrases:
+Cũng cut những filler phrases này:
 
 - "At its core"
-- "In today's [X]"
+- "Trong today's [X]"
 - "It's worth noting"
-- "At the end of the day"
-- "When it comes to"
-- "In a world where"
-- "The reality is"
+- "At the end of day"
+- "Khi nói đến"
+- "Trong một world where"
+- "The reality là"
 
 ## Meta-Commentary
 
-Remove self-referential asides. The essay should move, not announce its own structure.
+Xóa self-referential asides. Essay nên move, không announce structure本身.
 
 - "Hint:"
 - "Plot twist:" / "Spoiler:"
-- "You already know this, but"
-- "But that's another post"
-- "X is a feature, not a bug"
-- "Dressed up as"
-- "The rest of this essay explains..."
+- "Bạn đã biết điều này, nhưng"
+- "Nhưng đó là bài post khác"
+- "X là feature, không phải bug"
+- "Dressed up như"
+- "Phần còn lại của essay này explains..."
 - "Let me walk you through..."
-- "In this section, we'll..."
-- "As we'll see..."
-- "I want to explore..."
+- "Trong section này, we'll..."
+- "Như chúng ta sẽ see..."
+- "Tôi muốn explore..."
 
 ## Performative Emphasis
 
-False intimacy or manufactured sincerity:
+False intimacy hoặc manufactured sincerity:
 
 - "creeps in"
 - "I promise"
-- "They exist, I promise"
+- "Chúng tồn tại, I promise"
 
-## Telling Instead of Showing
+## Telling Instead của Showing
 
-Announcing difficulty or significance rather than demonstrating it:
+Announcing difficulty hoặc significance thay vì demonstrating nó:
 
-- "This is genuinely hard"
-- "This is what leadership actually looks like"
-- "This is what X actually looks like"
+- "Cái này genuinely hard"
+- "Cái này là what leadership actually looks like"
+- "Cái này là what X actually looks like"
 - "actually matters"
 
 ## Vague Declaratives
 
-Sentences that announce importance without naming the specific thing. Kill these.
+Sentences announce importance không naming specific thing. Giết những cái này.
 
-- "The reasons are structural"
-- "The implications are significant"
-- "This is the deepest problem"
-- "The stakes are high"
-- "The consequences are real"
+- "Lý do là structural"
+- "Implications là significant"
+- "Đây là deepest problem"
+- "Stakes là high"
+- "Consequences là real"
 
-If a sentence says something is important/deep/structural without showing the specific thing, cut it or replace it with the specific thing.
+Nếu sentence nói cái gì đó important/deep/structural không showing specific thing, cut nó hoặc thay thế bằng specific thing.

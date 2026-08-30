@@ -1,32 +1,32 @@
-# filechanges (pi extension)
+# filechanges (tiện ích mở rộng pi)
 
-Tracks files changed (modified/created) by **pi** via the built-in `edit` and `write` tools.
+Theo dõi files changed (modified/created) bởi **pi** qua built-in `edit` và `write` tools.
 
-## Features
+## Tính năng
 
-- Persistent log (stored in session as custom entries)
+- Persistent log (stored trong session như custom entries)
 - Status line + widget listing changed files
-- `/filechanges` overlay to inspect diffs
-- `/filechanges-accept` to clear the log (keep files)
-- `/filechanges-decline` to revert logged changes (restore original contents / delete created files)
+- `/filechanges` overlay để inspect diffs
+- `/filechanges-accept` để clear log (giữ files)
+- `/filechanges-decline` để revert logged changes (restore original contents / delete created files)
 
 ## Usage
 
 1. Reload pi: `/reload`
-2. Make changes through pi (using `edit`/`write`)
-3. Run:
-   - `/filechanges` to inspect
-   - `/filechanges-accept` to accept (clear log)
-   - `/filechanges-decline` to decline (revert)
+2. Make changes qua pi (dùng `edit`/`write`)
+3. Chạy:
+   - `/filechanges` để inspect
+   - `/filechanges-accept` để accept (clear log)
+   - `/filechanges-decline` để decline (revert)
 
 ### Non-interactive usage
 
-If `ctx.hasUI` is false (print/json mode), accept/decline require explicit confirmation:
+Nếu `ctx.hasUI` là false (print/json mode), accept/decline require explicit confirmation:
 
 - `/filechanges-accept force`
 - `/filechanges-decline force`
 
 ## Notes
 
-- Only tracks changes performed through `edit` and `write` tools.
-- To support “decline”, the extension stores the original file contents (before the first pi change) in the session file as a custom entry.
+- Chỉ theo dõi changes performed qua `edit` và `write` tools.
+- Để support "decline", extension lưu original file contents (trước first pi change) trong session file như custom entry.

@@ -1,7 +1,7 @@
 ---
-name: Diagnose, don't fix
-description: Read-only, report findings and a proposed fix
+name: Chẩn đoán, không sửa
+description: Chỉ đọc, báo cáo phát hiện và hướng fix đề xuất
 placement: append
 order: 40
 ---
-Investigate and diagnose the issue. Do not change any code. Report back with your findings and a proposed fix. Do not apply the fix yet.
+Điều tra và chẩn đoán vấn đề. Không thay đổi code nào. Báo cáo lại với phát hiện và hướng khắc phục đề xuất. Chưa áp dụng fix.

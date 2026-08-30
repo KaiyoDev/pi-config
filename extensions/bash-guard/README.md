@@ -1,37 +1,29 @@
-# bash-guard (pi extension)
+# bash-guard (tiện ích mở rộng pi)
 
-Intercepts agent-issued `bash` tool calls and applies different protection depending on whether
-the session is interactive (main session) or non-interactive (spawned subagent).
+Chặn các lệnh `bash` tool calls từ agent và áp dụng bảo vệ khác nhau tùy theo phiên có tương tác (phiên chính) hay không tương tác (subagent được spawn).
 
-## Modes
+## Chế độ
 
-Behaviour is determined at registration time via the `PI_SUBAGENT_DEPTH` environment variable,
-which pi-subagents injects into every spawned process.
+Hành vi được xác định lúc registration time qua biến môi trường `PI_SUBAGENT_DEPTH`, được pi-subagents inject vào mọi spawned process.
 
-### Main session (`PI_SUBAGENT_DEPTH` = 0 or unset) — interactive prompt
+### Phiên chính (`PI_SUBAGENT_DEPTH` = 0 hoặc chưa đặt) — interactive prompt
 
-- Heuristically detects destructive/questionable commands via shell-aware parsing
-- Prompts for **any** `git ...` command (escalates severity for especially risky ones: `git rm`,
-  `git reset --hard`, `git clean -fdx`, `git push --force`, `git reflog expire`, `git gc --prune`)
-- Prompts for disk/volume tooling: `diskutil`, `hdiutil`, `mkfs*`, `newfs_*`, `wipefs`, `parted`,
-  `fdisk`, `gdisk/sgdisk`, `cryptsetup`, `pvcreate/vgcreate/lvcreate`, `zpool`, `lsblk`
-- Prompts for: `rm`/`rmdir`/`unlink`, `sudo`, `find -delete`, `dd`, `truncate`, `sed -i`,
-  `perl -pi`, `chmod/chown -R`, `mv/cp --force`, `kill`/`pkill`/`killall`, `shutdown`/`reboot`,
-  `systemctl stop/disable`, `curl|sh`/`wget|sh`, `kubectl delete`, `terraform destroy`,
-  `aws s3 rm --recursive`, `gcloud delete`, shell redirections (`>`, `>>`, `2>`), pipes
-- Shows a 2-option dialog: **Run** / **Abort**
-- If aborted, the tool call is blocked and the model receives a clear reason
-- Remembers recently aborted commands for 60 s to prevent retry loops
+- Heuristically phát hiện các lệnh destructiveness/questionable qua shell-aware parsing
+- Yêu cầu xác nhận cho **mọi** lệnh `git ...` (tăng severity cho những cái rủi ro đặc biệt: `git rm`, `git reset --hard`, `git clean -fdx`, `git push --force`, `git reflog expire`, `git gc --prune`)
+- Yêu cầu xác nhận cho disk/volume tooling: `diskutil`, `hdiutil`, `mkfs*`, `newfs_*`, `wipefs`, `parted`, `fdisk`, `gdisk/sgdisk`, `cryptsetup`, `pvcreate/vgcreate/lvcreate`, `zpool`, `lsblk`
+- Yêu cầu xác nhận cho: `rm`/`rmdir`/`unlink`, `sudo`, `find -delete`, `dd`, `truncate`, `sed -i`, `perl -pi`, `chmod/chown -R`, `mv/cp --force`, `kill`/`pkill`/`killall`, `shutdown`/`reboot`, `systemctl stop/disable`, `curl|sh`/`wget|sh`, `kubectl delete`, `terraform destroy`, `aws s3 rm --recursive`, `gcloud delete`, shell redirections (`>`, `>>`, `2>`), pipes
+- Hiển thị 2-option dialog: **Chạy** / **Hủy**
+- Nếu hủy, tool call bị chặn và model nhận được lý do rõ ràng
+- Nhớ các lệnh đã hủy gần đây trong 60s để prevent retry loops
 
 ### Subagent (`PI_SUBAGENT_DEPTH` ≥ 1) — headless hard-block
 
-Spawned subagents have no UI (stdin is `/dev/null`), so prompting is impossible. Instead,
-a focused set of catastrophic/unrecoverable operations is hard-blocked with no user interaction:
+Spawned subagents không có UI (stdin là `/dev/null`), nên prompting là không thể. Thay vào đó, một focused set của catastrophic/unrecoverable operations được hard-blocked không cần user interaction:
 
-| Pattern | Reason |
+| Pattern | Lý do |
 |---|---|
-| `rm -r` / `-rf` / `-Rf` | Recursive deletion |
-| `sudo` | Elevated privileges |
+| `rm -r` / `-rf` / `-Rf` | Xóa recursive |
+| `sudo` | Privileges elevated |
 | `curl\|sh`, `wget\|sh` | Pipe to shell (remote code execution) |
 | `mkfs*`, `newfs_*` | Filesystem formatting |
 | `wipefs` | Disk signature wipe |
@@ -48,18 +40,17 @@ a focused set of catastrophic/unrecoverable operations is hard-blocked with no u
 | `git pull` | Main-session operation |
 | `git push` | Main-session operation |
 | `git reset --hard` | Discard all uncommitted changes |
-| `git clean -f` | Delete untracked files |
-| `git reflog expire` | Remove recovery history |
+| `git clean -f` | Xóa untracked files |
+| `git reflog expire` | Xóa recovery history |
 | `git gc --prune` | Prune unreachable objects |
 
-All other commands (including routine git operations) pass through unaffected.
+Tất cả các lệnh khác (bao gồm routine git operations) pass through không ảnh hưởng.
 
-## Install
+## Cài đặt
 
-Auto-discovered from `~/.pi/agent/extensions/bash-guard/`. Run `/reload` in pi.
+Auto-discovered từ `~/.pi/agent/extensions/bash-guard/`. Chạy `/reload` trong pi.
 
-## Notes
+## Lưu ý
 
-- Scope: `bash` tool calls only (`write`/`edit` and user `!` commands are not intercepted).
-- `--bash-guard-auto-allow`: main-session flag that allows flagged commands when there is no UI
-  (e.g. running pi non-interactively). Has no effect in subagent sessions.
+- Scope: chỉ `bash` tool calls (`write`/`edit` và user `!` commands không bị chặn).
+- `--bash-guard-auto-allow`: main-session flag cho phép flagged commands khi không có UI (vd chạy pi non-interactively). Không có effect trong subagent sessions.

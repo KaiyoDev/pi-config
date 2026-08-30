@@ -1,15 +1,15 @@
 ---
 name: reddit
-description: Search Reddit and browse subreddit posts using the public JSON API. Use when you need to find Reddit discussions, community reactions, or story leads from specific subreddits.
+description: Tìm kiếm Reddit và duyệt subreddit posts sử dụng public JSON API. Dùng khi bạn cần find Reddit discussions, community reactions, hoặc story leads từ subreddit cụ thể.
 ---
 
 # Reddit
 
-Search Reddit, browse subreddit top posts, and read individual posts with comments. No API key required.
+Tìm kiếm Reddit, duyệt subreddit top posts, và đọc individual posts với comments. Không cần API key.
 
 ## Tool
 
-Use `reddit.js` from this skill directory:
+Dùng `reddit.js` từ skill directory này:
 
 ```bash
 node reddit.js <command> [options]
@@ -17,17 +17,17 @@ node reddit.js <command> [options]
 
 ## Commands
 
-### Search all of Reddit
+### Tìm kiếm toàn bộ Reddit
 ```bash
 reddit.js search "query" [-n count] [-t period] [-s sort]
 ```
 
-### Top posts from a subreddit
+### Top posts từ subreddit
 ```bash
 reddit.js top <subreddit> [-n count] [-t period]
 ```
 
-### Read a post with top comments
+### Đọc post với top comments
 ```bash
 reddit.js post <url> [-c comment_count]
 ```
@@ -36,17 +36,17 @@ reddit.js post <url> [-c comment_count]
 
 | Flag | Default | Values |
 |------|---------|--------|
-| `-n` | 10 | Number of results (max 100) |
+| `-n` | 10 | Số results (max 100) |
 | `-t` | year | `hour`, `day`, `week`, `month`, `year`, `all` |
 | `-s` | top | `relevance`, `hot`, `top`, `new`, `comments` |
-| `-c` | 5 | Number of comments to show |
+| `-c` | 5 | Số comments để show |
 
 ## Output
 
-Each post shows: score, comment count, title, subreddit, author, date, link, and a text preview. The `post` command additionally shows top comments with scores.
+Mỗi post hiển thị: score, comment count, title, subreddit, author, date, link, và text preview. `post` command additionally hiển thị top comments với scores.
 
 ## Notes
 
-- **Rate limiting**: Reddit rate-limits unauthenticated requests. Add a small delay between rapid successive calls if needed.
-- **Search relevance**: Global search can be noisy. Subreddit-specific `top` browsing tends to surface better results for niche research.
-- **Subreddit names**: Pass without the `r/` prefix (e.g., `cybersecurity` not `r/cybersecurity`).
+- **Rate limiting**: Reddit rate-limits unauthenticated requests. Thêm small delay giữa rapid successive calls nếu needed.
+- **Search relevance**: Global search có thể noisy. Subreddit-specific `top` browsing tends surfacing better results cho niche research.
+- **Subreddit names**: Pass không có `r/` prefix (vd, `cybersecurity` không phải `r/cybersecurity`).

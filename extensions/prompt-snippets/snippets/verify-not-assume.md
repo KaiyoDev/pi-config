@@ -1,7 +1,7 @@
 ---
-name: Verify, don't assume
-description: Do not assume — verify
+name: Xác minh, không đoán
+description: Đừng đoán — hãy xác minh
 placement: append
 order: 20
 ---
-Do not assume — verify. Verify critical facts rather than guessing. And ask me, if you cannot verify something. Only begin once you are 100% sure of what to do. If you catch yourself being even slightly unsure, that's a sign to check first.
+Đừng đoán — hãy xác minh. Xác minh các sự thật quan trọng thay vì đoán. Và hỏi tôi nếu bạn không thể xác minh điều gì đó. Chỉ bắt đầu khi bạn 100% chắc chắn. Nếu thấy mình hơi nghi ngờ, đó là dấu hiệu cần kiểm tra trước.

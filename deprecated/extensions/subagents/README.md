@@ -1,6 +1,6 @@
 # Minimal Subagents
 
-A pi extension that registers a single `subagent` tool with three agents:
+Một pi extension đăng ký single `subagent` tool với ba agents:
 
 | Agent | Tools | Model | Purpose |
 |-------|-------|-------|---------|
@@ -12,22 +12,22 @@ A pi extension that registers a single `subagent` tool with three agents:
 
 **Single mode:**
 ```json
-{ "agent": "scout", "task": "Find all auth-related files in src/" }
+{ "agent": "scout", "task": "Tìm tất cả auth-related files trong src/" }
 ```
 
 **Parallel mode:**
 ```json
 { "tasks": [
-  { "agent": "scout", "task": "Map the database layer" },
-  { "agent": "researcher", "task": "Best practices for connection pooling" }
+  { "agent": "scout", "task": "Map database layer" },
+  { "agent": "researcher", "task": "Best practices cho connection pooling" }
 ]}
 ```
 
-Max 4 concurrent subagents (configurable). Each runs as an isolated `pi` process with no inherited context — all context must be in the task description.
+Max 4 concurrent subagents (configurable). Mỗi chạy như isolated `pi` process không có inherited context — tất cả context phải trong task description.
 
 ## Config
 
-Optional `config.json` next to `index.ts`:
+Optional `config.json` cạnh `index.ts`:
 
 ```json
 { "maxConcurrency": 4 }
@@ -35,38 +35,38 @@ Optional `config.json` next to `index.ts`:
 
 ## UI
 
-Default view shows medium detail (agent status, task preview, recent tools). Expand to see full task, all tool calls, complete output, and token usage.
+Default view hiển thị medium detail (agent status, task preview, recent tools). Expand để thấy full task, tất cả tool calls, complete output, và token usage.
 
-## Registering Agents from Other Extensions
+## Registering Agents từ Extensions khác
 
-Other extensions can dynamically register and unregister agents at runtime. This is useful for domain-specific agents that should only be available when a particular extension is active.
+Extensions khác có thể dynamically register và unregister agents tại runtime. Cái này hữu ích cho domain-specific agents nên chỉ available khi particular extension active.
 
 ### 1. Define agent `.md` files
 
-Create markdown files with YAML frontmatter in your extension's directory (e.g. `my-extension/agents/my-agent.md`):
+Tạo markdown files với YAML frontmatter trong extension directory của bạn (vd, `my-extension/agents/my-agent.md`):
 
 ```markdown
 ---
 name: my-agent
-description: Does a specific thing
+description: Làm một cái gì đó specific
 tools: web_search, video_extract
 model: claude-sonnet-4-20250514
 ---
 
-You are an agent that does a specific thing...
+Bạn là một agent làm một cái gì đó specific...
 ```
 
 Frontmatter fields:
-- **name** (required) — unique agent name, used in `{ agent: "my-agent" }` calls
+- **name** (required) — unique agent name, used trong `{ agent: "my-agent" }` calls
 - **description** — short description
-- **tools** — comma-separated list of tools the agent needs (builtin or extension)
-- **model** — model identifier (defaults to `anthropic/claude-sonnet-4-6`)
+- **tools** — comma-separated list của tools agent cần (builtin hoặc extension)
+- **model** — model identifier (mặc định `anthropic/claude-sonnet-4-6`)
 
-The markdown body becomes the agent's system prompt.
+Markdown body trở thành agent's system prompt.
 
-### 2. Register agents via `globalThis.__pi_subagents`
+### 2. Register agents qua `globalThis.__pi_subagents`
 
-Pi loads extensions via jiti, which creates separate module instances. Direct imports from the subagents extension will reference a different `agents` array than the one the `subagent` tool uses. Use the `globalThis` bridge instead:
+Pi load extensions qua jiti, tạo separate module instances. Direct imports từ subagents extension sẽ reference different `agents` array hơn `subagent` tool dùng. Dùng `globalThis` bridge thay thế:
 
 ```typescript
 import { parseFrontmatter } from "@mariozechner/pi-coding-agent";
@@ -85,12 +85,12 @@ interface AgentConfig {
 const AGENTS_DIR = path.join(path.dirname(new URL(import.meta.url).pathname), "agents");
 
 function registerMyAgents(): void {
-  const subagents = (globalThis as any).__pi_subagents as
+  const subagents = (globalThis as any).__pi_subagents như
     | { registerAgent: (config: AgentConfig) => void; unregisterAgent: (name: string) => void }
     | undefined;
-  if (!subagents) return; // subagents extension not loaded
+  if (!subagents) return; // subagents extension chưa load
 
-  for (const entry of fs.readdirSync(AGENTS_DIR)) {
+  for (const entry của fs.readdirSync(AGENTS_DIR)) {
     if (!entry.endsWith(".md")) continue;
     const filePath = path.join(AGENTS_DIR, entry);
     const content = fs.readFileSync(filePath, "utf-8");
@@ -108,17 +108,17 @@ function registerMyAgents(): void {
         filePath,
       });
     } catch {
-      // Already registered — skip
+      // Đã registered — skip
     }
   }
 }
 ```
 
-Call `registerMyAgents()` when your extension activates (e.g. in a command handler). The agents become available to the `subagent` tool immediately.
+Gọi `registerMyAgents()` khi extension của bạn activate (vd, trong command handler). Agents trở nên available cho `subagent` tool ngay lập tức.
 
 ### 3. Adding custom tool support
 
-If your agents need tools beyond the built-in set, those tools must be mapped in the `CUSTOM_TOOL_EXTENSIONS` record in `subagents/index.ts`:
+Nếu agents của bạn cần tools beyond built-in set,那些 tools phải mapped trong `CUSTOM_TOOL_EXTENSIONS` record trong `subagents/index.ts`:
 
 ```typescript
 const CUSTOM_TOOL_EXTENSIONS: Record<string, string> = {
@@ -131,7 +131,7 @@ const CUSTOM_TOOL_EXTENSIONS: Record<string, string> = {
 };
 ```
 
-Built-in tools (`read`, `write`, `edit`, `bash`, `grep`, `find`, `ls`) work automatically. Any other tool the agent lists in its frontmatter must have a corresponding entry here pointing to the extension's `index.ts`.
+Built-in tools (`read`, `write`, `edit`, `bash`, `grep`, `find`, `ls`) work automatically. Bất kỳ tool nào agent list trong frontmatter của nó phải có corresponding entry đây pointing đến extension's `index.ts`.
 
 ## Structure
 
@@ -139,6 +139,6 @@ Built-in tools (`read`, `write`, `edit`, `bash`, `grep`, `find`, `ls`) work auto
 subagents/
 ├── index.ts           # Extension entry point
 ├── agents/            # Built-in agent configs (frontmatter + system prompt)
-└── tools/             # Extensions loaded into subagent processes
-    └── safe-bash.ts   # bash with dangerous command blocking
+└── tools/             # Extensions loaded vào subagent processes
+    └── safe-bash.ts   # bash với dangerous command blocking
 ```

@@ -1,156 +1,102 @@
-# pi browser extension
+# Tiện ích mở rộng browser pi
 
-Playwright-driven headless Chromium that pi can drive directly. Lets the agent
-debug a live SPA the same way a human would in devtools: navigate, run JS,
-inspect localStorage, watch the console and network, fill forms, click.
+Trình duyệt Chromium headless điều khiển bởi Playwright mà pi có thể điều khiển trực tiếp. Cho phép agent gỡ lỗi SPA live giống cách con người làm trong devtools: điều hướng, chạy JS, kiểm tra localStorage, theo dõi console và network, điền form, click.
 
-## Why it exists
+## Tại sao có extension này
 
-When a frontend bug reduces to "what's in localStorage?" or "what `Authorization`
-header did supabase-js attach?", the agent currently has to ask the user to
-paste console output and curls. With this extension it can answer those
-questions itself.
+Khi một lỗi frontend chỉ còn là "localStorage chứa gì?" hoặc "header `Authorization` mà supabase-js đính kèm là gì?", agent hiện phải yêu cầu user dán output từ console và curls. Với extension này, nó có thể tự trả lời những câu hỏi đó.
 
-## Install
+## Cài đặt
 
 ```bash
 cd ~/.pi/agent/extensions/browser
 npm install
-npx playwright install chromium    # one-time browser binary download (~150MB)
+npx playwright install chromium    # tải browser binary một lần (~150MB)
 ```
 
-Then `/reload` inside pi (or restart). The new tools (`browser_goto`,
-`browser_eval`, …) appear in `pi.getAllTools()` automatically because the
-folder is under `~/.pi/agent/extensions/`.
+Sau đó `/reload` trong pi (hoặc restart). Các công cụ mới (`browser_goto`, `browser_eval`, …) xuất hiện trong `pi.getAllTools()` tự động vì folder nằm dưới `~/.pi/agent/extensions/`.
 
-## Default off, opt in per session
+## Mặc định tắt, kích hoạt theo phiên
 
-The browser tools collectively cost ~800 tokens in the system prompt
-(snippets + guidelines) but are only useful in the small minority of
-sessions that involve driving a live SPA. They're therefore registered but
-**inactive** by default: invisible to the agent, not callable, no prompt
-snippets or guidelines emitted.
+Các công cụ browser tốn ~800 tokens trong system prompt (snippets + guidelines) nhưng chỉ hữu ích ở số ít phiên làm việc liên quan đến điều khiển SPA live. Vì vậy chúng được đăng ký nhưng **không hoạt động** mặc định: vô hình với agent, không thể gọi, không có prompt snippets hay guidelines.
 
-Flip them on when you actually need them:
+Bật chúng khi thực sự cần:
 
 ```
-/browser on        # enable
-/browser           # status
-/browser off       # disable and close the headless browser
+/browser on        # bật
+/browser           # trạng thái
+/browser off       # tắt và đóng headless browser
 ```
 
-The enable bit persists for the current session via a custom session entry,
-so `/reload` and pi restart keep it on. `/new` resets to off. Disabling also
-tears down the Chromium context (`browser_close` semantics) so no
-background browser is left running.
+Bit enable tồn tại cho phiên hiện tại qua custom session entry, nên `/reload` và pi restart giữ nguyên. `/new` reset về off. Tắt cũng tear down Chromium context (semantics `browser_close`) nên không để browser background chạy lạc.
 
-## Tools
+## Công cụ
 
-(Only visible to the agent while `/browser on`.)
+(Chỉ hiển thị với agent khi `/browser on`.)
 
-| Tool | Purpose |
+| Công cụ | Mục đích |
 |---|---|
-| `browser_goto`       | Navigate to a URL. Returns `{ status, finalUrl }`. |
-| `browser_eval`       | Run JS in the page. Expression, function source, or already-called IIFE — all three work. Return value must be JSON-serializable. |
-| `browser_console`    | Drain buffered console + pageerror entries (filterable, bounded to 1000). |
-| `browser_network`    | Drain buffered network requests. Default output is terse (`status method url`); pass `verbose: true` and/or `includeHeaders: [...]` to inline curated request/response headers on each row. |
-| `browser_fill`       | Type a value into an input matched by selector. |
-| `browser_click`      | Click an element (CSS, `text=...`, `role=...`). |
-| `browser_screenshot` | Save a PNG to a tempdir and return its path; pi can `read` it to view. |
-| `browser_close`      | Kill the persistent context. |
+| `browser_goto`       | Điều hướng đến URL. Trả về `{ status, finalUrl }`. |
+| `browser_eval`       | Chạy JS trong page. Expression, function source, hoặc IIFE đã gọi — cả ba đều hoạt động. Return value phải JSON-serializable. |
+| `browser_console`    | Drain buffered console + pageerror entries (filterable, bounded 1000). |
+| `browser_network`    | Drain buffered network requests. Output mặc định ngắn gọn (`status method url`); truyền `verbose: true` và/hoặc `includeHeaders: [...]` để inline curated request/response headers trên mỗi row. |
+| `browser_fill`       | Gõ giá trị vào input matched bởi selector. |
+| `browser_click`      | Click element (CSS, `text=...`, `role=...`). |
+| `browser_screenshot` | Lưu PNG vào tempdir và trả về path; pi có thể `read` để xem. |
+| `browser_close`      | Kill persistent context. |
 
-All page-touching tools serialize through a single internal queue, so it's
-safe to fire several `browser_*` calls in one batch — they run in submission
-order against the shared Page rather than racing each other.
+Tất cả công cụ touch page được serialize qua single internal queue, nên an toàn khi fire nhiều `browser_*` calls trong một batch — chúng chạy theo submission order trên shared Page thay vì racing nhau.
 
-The `/browser` command also controls the enable gate (`on` / `off` / bare
-for status; `close` and `kill` are aliases for `off`).
+Lệnh `/browser` cũng kiểm soát enable gate (`on` / `off` / bare để status; `close` và `kill` là aliases của `off`).
 
-## State
+## Trạng thái
 
-- Browser state (cookies, localStorage, IndexedDB) is persisted to
-  `~/.pi/agent/extensions/browser/.profile` via
-  `chromium.launchPersistentContext`. Login sessions survive across pi turns
-  and pi restarts.
-- Console + network events are captured into in-memory ring buffers (max 1000
-  entries each). `browser_console` and `browser_network` drain them by default.
-- The persistent context is closed in `session_shutdown`, so a `/new` or pi
-  exit cleans up. The user-data dir on disk is left in place.
+- Browser state (cookies, localStorage, IndexedDB) được persist vào `~/.pi/agent/extensions/browser/.profile` qua `chromium.launchPersistentContext`. Login sessions tồn tại qua các lần quay pi và khởi động lại pi.
+- Console + network events được capture vào in-memory ring buffers (max 1000 entries mỗi cái). `browser_console` và `browser_network` drain chúng mặc định.
+- Persistent context được đóng trong `session_shutdown`, nên `/new` hoặc pi exit clean up. User-data dir trên disk được giữ nguyên.
 
-## Knobs
+## Cài đặt
 
-| Env var | Default | Effect |
+| Biến môi trường | Mặc định | Tác dụng |
 |---|---|---|
-| `PI_BROWSER_HEADFUL` | unset | If set, launch a visible Chromium window. Useful when debugging the extension itself. |
-| `PI_BROWSER_PROFILE` | `~/.pi/agent/extensions/browser/.profile` | Override the persistent user-data dir. Set to a tempdir for ephemeral sessions. |
+| `PI_BROWSER_HEADFUL` | chưa đặt | Nếu đặt, launch visible Chromium window. Hữu ích khi debugging extension本身. |
+| `PI_BROWSER_PROFILE` | `~/.pi/agent/extensions/browser/.profile` | Override persistent user-data dir. Đặt về tempdir cho ephemeral sessions. |
 
-## Network output: terse by default, headers on opt-in
+## Output network: gọn nhẹ mặc định, headers khi chọn
 
-`browser_network` keeps the default text payload minimal — one line per
-request, `status method url` — because a single SPA page load fires 30–100
-subresource requests and inlining headers on all of them would drown the
-agent's context window in noise.
+`browser_network` giữ default text payload tối giản — một dòng cho mỗi request, `status method url` — vì một lần tải trang SPA đơn lẻ kích hoạt 30–100 subresource requests và inline headers trên tất cả sẽ làm context window của agent ngập trong nhiễu.
 
-When you actually want headers (the auth-debugging use case), opt in:
+Khi bạn thực sự muốn headers (use case auth-debugging), chọn:
 
-- `verbose: true` — inline a curated set of request/response headers on each
-  returned row. The curated set is small on purpose:
+- `verbose: true` — inline curated set của request/response headers trên mỗi returned row. Curated set nhỏ có chủ đích:
 
   ```
   authorization, apikey, content-type, x-client-info, accept-profile,
   content-profile, prefer, location, www-authenticate, retry-after
   ```
 
-- `includeHeaders: ["cookie", "cache-control", ...]` — extend the curated set
-  for this call only (case-insensitive). Implies `verbose: true`.
+- `includeHeaders: ["cookie", "cache-control", ...]` — extend curated set cho call này chỉ (case-insensitive). Implies `verbose: true`.
 
-All headers are captured into the ring buffer regardless; `verbose` /
-`includeHeaders` only affect what's rendered into the text output. Best
-paired with `urlFilter` / `status` so headers only appear on the rows you
-actually care about.
+Tất cả headers được capture vào ring buffer bất kể; `verbose` / `includeHeaders` chỉ ảnh hưởng what được render vào text output. Best paired với `urlFilter` / `status` để headers chỉ xuất hiện trên rows bạn thực sự quan tâm.
 
-Clear-on-read drains the **entire** buffer by default, not just the rows
-returned. This is intentional: subsequent calls observe a fresh activity
-window rather than re-walking the same subresource noise. Pass `clear: false`
-to peek without draining.
+Clear-on-read drain **toàn bộ** buffer mặc định, không chỉ rows returned. Điều này có chủ đích: subsequent calls quan sát fresh activity window thay vì re-walking cùng subresource noise. Truyền `clear: false` để peek mà không drain.
 
-## Caveats and known limits
+## Hạn chế đã biết
 
-- `playwright-core` ships without browser binaries; the `npx playwright install
-  chromium` step above is required exactly once per machine.
-- The page object is a singleton — there's no tab/window management. If you
-  need multiple tabs, extend `ensurePage` to accept a tab id.
-- `browser_eval` evaluates the source once and, if the result is a function,
-  calls it. So expressions (`localStorage.length`), function values
-  (`() => doStuff()`), and already-called IIFEs (`(() => 42)()`) all do what
-  you'd expect. Note: top-level `return` and multi-statement bodies aren't
-  valid expressions — wrap them in `(() => { ... })()`.
-- For DOM nodes, return primitive properties (`.outerHTML`, `.textContent`,
-  `.value`) rather than the node itself; Playwright serializes nodes as the
-  opaque sentinel `"ref: <Node>"`.
-- `browser_eval` returns `undefined` as `null` after JSON serialization. Wrap
-  expressions in a function that returns a sentinel if you care.
-- `browser_click`: CSS attribute selectors match HTML attributes, not DOM
-  properties. `button[type=submit]` will NOT match `<button>Submit</button>`
-  even though that button's `.type === "submit"` by default. Prefer
-  `text=Submit` or `role=button[name=Submit]` for semantic matching.
-- `browser_network` shows `ERR net::ERR_ABORTED` for fetches whose body was
-  never consumed (e.g. `await fetch(url)` without `.text()` / `.json()`).
-  Chromium cancels the body stream and Playwright reports `requestfailed`
-  even though the JS side saw a successful response. Consume the body if you
-  want a clean status row.
-- Network buffer captures headers but not bodies. Add `request.postData()` /
-  `response.text()` capture if you need bodies (will eat context fast — gate
-  it behind a flag).
-- No download / file-upload helpers yet. Add when needed.
-- OTP / 2FA: the extension has no mail integration. Human still has to paste the code into `browser_fill`.
+- `playwright-core` được cung cấp không có browser binaries; bước `npx playwright install chromium` ở trên là bắt buộc đúng một lần cho mỗi máy.
+- Page object là singleton — không có tab/window management. Nếu bạn cần nhiều tab, extend `ensurePage` để accept tab id.
+- `browser_eval` evaluate source một lần và, nếu result là function, gọi nó. Vậy expressions (`localStorage.length`), function values (`() => doStuff()`), và đã gọi IIFEs (`(() => 42)()`) đều làm những gì bạn mong đợi. Note: top-level `return` và multi-statement bodies không phải valid expressions — wrap chúng trong `(() => { ... })()`.
+- Với DOM nodes, return primitive properties (`.outerHTML`, `.textContent`, `.value`) thay vì node本身; Playwright serialize nodes thành opaque sentinel `"ref: <Node>"`.
+- `browser_eval` trả về `undefined` как `null` sau JSON serialization. Wrap expressions trong function trả về sentinel nếu bạn quan tâm.
+- `browser_click`: CSS attribute selectors match HTML attributes, không phải DOM properties. `button[type=submit]` sẽ KHÔNG match `<button>Submit</button>` ngay cả khi button đó có `.type === "submit"` mặc định. Prefer `text=Submit` hoặc `role=button[name=Submit]` cho semantic matching.
+- `browser_network` show `ERR net::ERR_ABORTED` cho fetches whose body was never consumed (vd `await fetch(url)` không có `.text()` / `.json()`). Chromium cancel body stream và Playwright báo `requestfailed` ngay cả khi JS side thấy response thành công. Consume body nếu bạn muốn clean status row.
+- Network buffer capture headers không phải bodies. Thêm `request.postData()` / `response.text()` capture nếu bạn cần bodies (sẽ ingest context nhanh — gate nó sau flag).
+- Chưa có download / file-upload helpers. Thêm khi cần.
+- OTP / 2FA: extension không có mail integration. Human vẫn phải paste code vào `browser_fill`.
 
-## Possible next features
+## Tính năng có thể thêm sau
 
-- `browser_wait_for(selector|url)` for explicit synchronization.
-- `browser_request_body` to expose request/response bodies on demand without
-  ballooning the default network buffer.
-- Mail-fetch tool (Gmail API or Mailpit) so OTP logins can be fully automated.
-- `fly_logs` companion tool — `flyctl logs -a <app>` tailed into a similar
-  ring buffer — so the agent can correlate frontend behavior with backend
-  errors without context switching.
+- `browser_wait_for(selector|url)` cho explicit synchronization.
+- `browser_request_body` để expose request/response bodies on demand không làm ballooning default network buffer.
+- Mail-fetch tool (Gmail API hoặc Mailpit) để OTP logins có thể fully automated.
+- `fly_logs` companion tool — `flyctl logs -a <app>` tailed vào similar ring buffer — để agent có thể correlate frontend behavior với backend errors không cần context switching.

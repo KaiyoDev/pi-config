@@ -1,15 +1,15 @@
 ---
 name: youtube-transcript
-description: Fetch the transcript and title of a YouTube video as JSON. Use when the user provides a YouTube URL and you need the spoken content (captions) for analysis, summarization, quoting, or search.
+description: Fetch transcript và title của YouTube video dưới dạng JSON. Dùng khi user cung cấp YouTube URL và bạn cần spoken content (captions) cho analysis, summarization, quoting, hoặc search.
 ---
 
 # YouTube Transcript
 
-Fetches a YouTube video's title and full transcript by pulling captions via `yt-dlp`. Prefers manual English subtitles, falls back to auto-generated English.
+Fetch title và full transcript của YouTube video bằng cách pull captions qua `yt-dlp`. Prefer manual English subtitles, fallback đến auto-generated English.
 
 ## Requirements
 
-- `yt-dlp` on PATH (`brew install yt-dlp`)
+- `yt-dlp` trên PATH (`brew install yt-dlp`)
 - Python 3
 
 ## Usage
@@ -20,19 +20,19 @@ python3 ~/.pi/agent/skills/youtube-transcript/fetch_transcript.py "<youtube_url>
 
 ## Output
 
-Prints a JSON object to stdout:
+In JSON object ra stdout:
 
 ```json
 {
-  "title": "Video title",
-  "transcript": "full transcript text as a single string"
+  "title": "Tiêu đề video",
+  "transcript": "full transcript text dưới dạng single string"
 }
 ```
 
-Progress/info logs go to stderr. On failure (no English captions, network error, bad URL), the script exits non-zero with a message on stderr.
+Progress/info logs ra stderr. Trên failure (không có English captions, network error, bad URL), script exit non-zero với message trên stderr.
 
 ## Notes
 
-- Only English captions are attempted (`en`, `en-US`, `en-GB`, then any `en*`). Manual captions are preferred over auto-generated.
-- Transcript is plain text with timing/formatting stripped — not timestamped.
-- For non-English videos or videos with captions disabled, the script will fail; consider `video_extract` with a Gemini prompt as a fallback.
+- Chỉ English captions được attempted (`en`, `en-US`, `en-GB`, sau đó bất kỳ `en*`). Manual captions preferred over auto-generated.
+- Transcript là plain text với timing/formatting stripped — không timestamped.
+- Với non-English videos hoặc videos có captions disabled, script sẽ fail; consider `video_extract` với Gemini prompt như fallback.

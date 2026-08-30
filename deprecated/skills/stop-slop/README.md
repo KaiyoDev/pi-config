@@ -1,21 +1,21 @@
 # Stop Slop
 
-A skill for removing AI tells from prose.
+Skill loại bỏ AI tells khỏi prose.
 
 <img width="3840" height="2160" alt="G-Yg4RVbIAAhVxW" src="https://github.com/user-attachments/assets/902afc15-1f40-4a9d-af24-8cd67afb8ebf" />
 
-## What this is
+## Đây là gì
 
-AI writing has patterns. Predictable phrases, structures, rhythms. This skill teaches Claude (or any LLM) to catch and remove them.
+AI writing có patterns. Predictable phrases, structures, rhythms. Skill này dạy Claude (hoặc LLM nào cũng được) catch và remove chúng.
 
-## Skill Structure
+## Cấu trúc Skill
 
 ```
 stop-slop/
-├── SKILL.md              # Core instructions
+├── SKILL.md              # Hướng dẫn core
 ├── references/
-│   ├── phrases.md        # Phrases to remove
-│   ├── structures.md     # Structural patterns to avoid
+│   ├── phrases.md        # Phrases cần xóa
+│   ├── structures.md     # Structural patterns cần tránh
 │   └── examples.md       # Before/after transformations
 ├── README.md
 └── LICENSE
@@ -23,40 +23,40 @@ stop-slop/
 
 ## Quick start
 
-**Claude Code:** Add this folder as a skill.
+**Claude Code:** Thêm folder này như skill.
 
-**Claude Projects:** Upload `SKILL.md` and reference files to project knowledge.
+**Claude Projects:** Upload `SKILL.md` và reference files vào project knowledge.
 
-**Custom instructions:** Copy core rules from `SKILL.md`.
+**Custom instructions:** Copy core rules từ `SKILL.md`.
 
-**API calls:** Include `SKILL.md` in your system prompt. Reference files load on demand.
+**API calls:** Include `SKILL.md` trong system prompt của bạn. Reference files load on demand.
 
-## What it catches
+## Nó catch gì
 
-**Banned phrases** - Throat-clearing openers, emphasis crutches, business jargon, all adverbs, vague declaratives, meta-commentary. See `references/phrases.md`.
+**Banned phrases** - Throat-clearing openers, emphasis crutches, business jargon, all adverbs, vague declaratives, meta-commentary. Xem `references/phrases.md`.
 
-**Structural clichés** - Binary contrasts, negative listings, dramatic fragmentation, rhetorical setups, false agency, narrator-from-a-distance voice, passive voice. See `references/structures.md`.
+**Structural clichés** - Binary contrasts, negative listings, dramatic fragmentation, rhetorical setups, false agency, narrator-from-a-distance voice, passive voice. Xem `references/structures.md`.
 
-**Sentence-level rules** - No Wh- sentence starters, no em dashes, no staccato fragmentation, no lazy extremes, active voice required.
+**Sentence-level rules** - Không Wh- sentence starters, không em dashes, không staccato fragmentation, không lazy extremes, active voice required.
 
 ## Scoring
 
-Rate 1-10 on each dimension:
+Rate 1-10 trên mỗi dimension:
 
 | Dimension | Question |
 |-----------|----------|
-| Directness | Statements or announcements? |
-| Rhythm | Varied or metronomic? |
+| Directness | Statements hay announcements? |
+| Rhythm | Varied hay metronomic? |
 | Trust | Respects reader intelligence? |
 | Authenticity | Sounds human? |
-| Density | Anything cuttable? |
+| Density | Có gì cuttable không? |
 
-Below 35/50: revise.
+Dưới 35/50: revise.
 
-## Author
+## Tác giả
 
 [Hardik Pandya](https://hvpandya.com)
 
 ## License
 
-MIT. Use freely, share widely.
+MIT. Dùng tự do, chia sẻ rộng rãi.

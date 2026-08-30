@@ -1,7 +1,7 @@
-# Interactive subagents
+# Subagents tương tác
 
-This extension lives in its own repository:
+Extension này sống trong repo riêng:
 
-**→ [amosblomqvist/pi-interactive-subagents](https://github.com/amosblomqvist/pi-interactive-subagents)**
+**→ [pi-interactive-subagents](https://github.com/pi-interactive-subagents)**
 
-Async, interactive subagents for pi — spawned in multiplexer panes (tmux only), steered and resumed by name, sandboxed by default. A fork of [HazAT/pi-interactive-subagents](https://github.com/HazAT/pi-interactive-subagents), rebuilt around a smaller tool surface.
+Async, interactive subagents cho pi — được spawn trong multiplexer panes (chỉ tmux), steered và resumed by name, sandboxed mặc định. Fork của HazAT/pi-interactive-subagents, rebuild xung quanh small tool surface.

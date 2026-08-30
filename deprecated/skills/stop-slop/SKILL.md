@@ -1,64 +1,64 @@
 ---
 name: stop-slop
-description: Remove AI writing patterns from prose. Use when drafting, editing, or reviewing text to eliminate predictable AI tells.
+description: Loại bỏ AI writing patterns từ prose. Dùng khi drafting, editing, hoặc reviewing text để eliminate predictable AI tells.
 ---
 
 # Stop Slop
 
-Eliminate predictable AI writing patterns from prose.
+Loại bỏ AI writing patterns dự đoán được khỏi prose.
 
-## Core Rules
+## Quy tắc Core
 
-1. **Cut filler phrases.** Remove throat-clearing openers, emphasis crutches, and all adverbs. See [references/phrases.md](references/phrases.md).
+1. **Cắt filler phrases.** Xóa throat-clearing openers, emphasis crutches, và все adverbs. Xem [references/phrases.md](references/phrases.md).
 
-2. **Break formulaic structures.** Avoid binary contrasts, negative listings, dramatic fragmentation, rhetorical setups, false agency. See [references/structures.md](references/structures.md).
+2. **Phá cấu trúc formulaic.** Tránh binary contrasts, negative listings, dramatic fragmentation, rhetorical setups, false agency. Xem [references/structures.md](references/structures.md).
 
-3. **Use active voice.** Every sentence needs a human subject doing something. No passive constructions. No inanimate objects performing human actions ("the complaint becomes a fix").
+3. **Dùng active voice.** Mỗi câu cần human subject doing something. Không passive constructions. Không inanimate objects performing human actions ("lời phàn nàn trở thành fix").
 
-4. **Be specific.** No vague declaratives ("The reasons are structural"). Name the specific thing. No lazy extremes ("every," "always," "never") doing vague work.
+4. **Cụ thể.** Không vague declaratives ("Lý do mang tính cấu trúc"). Gọi tên thing cụ thể. Không lazy extremes ("every," "always," "never") làm việc mơ hồ.
 
-5. **Put the reader in the room.** No narrator-from-a-distance voice. "You" beats "People." Specifics beat abstractions.
+5. **Đặt người đọc trong phòng.** Không narrator-from-a-distance voice. "Bạn" thắng "Mọi người." Chi tiết thắng abstractions.
 
-6. **Vary rhythm.** Mix sentence lengths. Two items beat three. End paragraphs differently. No em dashes.
+6. **Biến tấu rhythm.** Trộn độ dài câu. Hai items thắng ba. Kết paragraphs khác nhau. Không em dashes.
 
-7. **Trust readers.** State facts directly. Skip softening, justification, hand-holding.
+7. **Tin tưởng readers.** State facts trực tiếp. Bỏ softening, justification, hand-holding.
 
-8. **Cut quotables.** If it sounds like a pull-quote, rewrite it.
+8. **Cắt quotables.** Nếu sounding như pull-quote, rewrite nó.
 
 ## Quick Checks
 
-Before delivering prose:
+Trước deliver prose:
 
-- Any adverbs? Kill them.
-- Any passive voice? Find the actor, make them the subject.
-- Inanimate thing doing a human verb ("the decision emerges")? Name the person.
-- Sentence starts with a Wh- word? Restructure it.
-- Any "here's what/this/that" throat-clearing? Cut to the point.
-- Any "not X, it's Y" contrasts? State Y directly.
-- Three consecutive sentences match length? Break one.
-- Paragraph ends with punchy one-liner? Vary it.
-- Em-dash anywhere? Remove it.
-- Vague declarative ("The implications are significant")? Name the specific implication.
-- Narrator-from-a-distance ("Nobody designed this")? Put the reader in the scene.
-- Meta-joiners ("The rest of this essay...")? Delete. Let the essay move.
+- Có adverbs không? Giết chúng.
+- Có passive voice không? Tìm actor, làm họ subject.
+- Inanimate thing doing human verb ("quyết định emerge")? Gọi tên người.
+- Câu start với Wh- word? Restructure nó.
+- Có "here's what/this/that" throat-clearing không? Cut to point.
+- Có "not X, it's Y" contrasts không? State Y trực tiếp.
+- Ba consecutive sentences match length? Break one.
+- Paragraph end với punchy one-liner? Vary it.
+- Em-dash ở đâu không? Remove nó.
+- Vague declarative ("Implications là significant")? Gọi tên implication cụ thể.
+- Narrator-from-a-distance ("Nobody designed this")? Đặt người đọc trong scene.
+- Meta-joiners ("The rest of essay này...")? Delete. Let essay move.
 
 ## Scoring
 
-Rate 1-10 on each dimension:
+Rate 1-10 trên mỗi dimension:
 
 | Dimension | Question |
 |-----------|----------|
-| Directness | Statements or announcements? |
-| Rhythm | Varied or metronomic? |
+| Directness | Statements hay announcements? |
+| Rhythm | Varied hay metronomic? |
 | Trust | Respects reader intelligence? |
 | Authenticity | Sounds human? |
-| Density | Anything cuttable? |
+| Density | Có gì cuttable không? |
 
-Below 35/50: revise.
+Dưới 35/50: revise.
 
 ## Examples
 
-See [references/examples.md](references/examples.md) for before/after transformations.
+Xem [references/examples.md](references/examples.md) cho before/after transformations.
 
 ## License
 

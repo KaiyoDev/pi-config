@@ -1,7 +1,7 @@
-# Observational memory
+# Bộ nhớ quan sát
 
-This extension lives in its own repository:
+Extension này sống trong repo riêng:
 
-**→ [amosblomqvist/pi-observational-memory](https://github.com/amosblomqvist/pi-observational-memory)**
+**→ [pi-observational-memory](https://github.com/pi-observational-memory)**
 
-Tiered, subprocess-backed memory for pi. Parallel observers distill the conversation into atomic observations, a consolidator promotes the oldest into durable `.memory/` topic files, and compaction is deterministic and model-free. My own implementation of the observational-memory idea (see [Mastra](https://mastra.ai/docs/memory/observational-memory)).
+Tiered, subprocess-backed memory cho pi. Parallel observers cô đọng conversation thành atomic observations, consolidator nâng cái cũ nhất thành durable `.memory/` topic files, và compaction là deterministic và model-free. Implementation của bản thân về observational-memory idea (xem Mastra).

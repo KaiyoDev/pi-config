@@ -1,19 +1,19 @@
 ---
 name: analyze-sessions
-description: Analyze past pi agent sessions stored under ~/.pi/agent/sessions. Use when the user asks about cost (totals, per project, per model, per day), wants to mine prompting patterns from past prompts, view a specific past session, or search across session transcripts.
+description: Phân tích các phiên pi agent trước đó lưu dưới ~/.pi/agent/sessions. Dùng khi user hỏi về cost (tổng, theo project, theo model, theo ngày), muốn khai thác pattern prompt từ prompt trước, xem session cụ thể, hoặc tìm kiếm qua session transcripts.
 ---
 
-# Analyze Sessions
+# Phân tích Sessions
 
-Tools for querying past pi sessions. All scripts are stdlib Python 3, no dependencies, and read directly from `~/.pi/agent/sessions/`.
+Công cụ query các phiên pi trước đó. Tất cả scripts là Python 3 stdlib, không dependencies, và đọc trực tiếp từ `~/.pi/agent/sessions/`.
 
 ## Data shape (one-liner)
 
-Each session is a JSONL file. Records are `session` (header with `cwd`, `id`, `timestamp`), `model_change`, `thinking_level_change`, and `message` (roles: `user`, `assistant`, `toolResult`). Assistant messages carry `usage.cost` already split into input/output/cacheRead/cacheWrite/total — cost analysis is just summing those. Subagent transcripts live nested inside the parent session's directory.
+Mỗi session là một JSONL file. Records là `session` (header với `cwd`, `id`, `timestamp`), `model_change`, `thinking_level_change`, và `message` (roles: `user`, `assistant`, `toolResult`). Assistant messages mang `usage.cost` đã chia thành input/output/cacheRead/cacheWrite/total — cost analysis chỉ là summing những cái đó. Subagent transcripts sống nested trong parent session directory.
 
 ## Scripts
 
-All scripts share the same filter vocabulary (see "Shared filters" below). Run them with `python3` from anywhere:
+Tất cả scripts chia sẻ cùng filter vocabulary (xem "Shared filters" bên dưới). Chạy chúng với `python3` từ bất kỳ đâu:
 
 ```bash
 python3 ~/.pi/agent/skills/analyze-sessions/scripts/<script>.py [args]
@@ -21,22 +21,22 @@ python3 ~/.pi/agent/skills/analyze-sessions/scripts/<script>.py [args]
 
 ### `cost.py` — cost rollups
 
-Subagent costs are **included by default** so totals reflect actual spend. Pass `--show-subagents` to see the subagent share per row, or `--no-subagents` to exclude.
+Cost subagents được **bao gồm mặc định** để totals phản ánh actual spend. Truyền `--show-subagents` để xem subagent share per row, hoặc `--no-subagents` để exclude.
 
 ```bash
-# Last 7 days, broken down by day (default)
+# 7 ngày gần nhất, breakdown theo day (mặc định)
 python3 cost.py
 
-# Last 30 days, top 10 projects by spend
+# 30 ngày gần nhất, top 10 projects by spend
 python3 cost.py --since 30d --by project --limit 10
 
-# Cost-per-model (each assistant message credited to its own model)
+# Cost-per-model (mỗi assistant message credited cho model của chính nó)
 python3 cost.py --since 30d --by model
 
-# The 10 most expensive sessions of the last month
+# 10 sessions đắt nhất của tháng trước
 python3 cost.py --since 30d --by session --limit 10
 
-# Cost of one project, all time
+# Cost của một project, tất cả thời gian
 python3 cost.py --cwd /path/to/your/project
 
 # Grand total only
@@ -46,110 +46,110 @@ python3 cost.py --since 30d --by total
 python3 cost.py --since 30d --by day --json
 ```
 
-Groupings: `total`, `day`, `project`, `model`, `session`. When grouping, `--limit` caps groups, not sessions.
+Groupings: `total`, `day`, `project`, `model`, `session`. Khi grouping, `--limit` cap groups, không phải sessions.
 
-### `prompts.py` — dump user prompts for pattern mining
+### `prompts.py` — dump user prompts cho pattern mining
 
-Output is markdown grouped by project (`--format jsonl` available). Prompts above `--max-chars` are dropped because they're almost always pasted context, not actual prompting.
+Output là markdown grouped by project (`--format jsonl` available). Prompts trên `--max-chars` bị drop vì hầu hết là pasted context, không phải actual prompting.
 
 ```bash
-# Default: markdown dump, max 2000 chars per prompt
+# Mặc định: markdown dump, max 2000 chars per prompt
 python3 prompts.py --since 30d
 
-# Tighter cap, one prompt per JSONL line
+# Cap tighter hơn, một prompt per JSONL line
 python3 prompts.py --since 7d --max-chars 1500 --format jsonl
 
-# One project's prompts
+# Prompts của một project
 python3 prompts.py --cwd /path/to/your/project --since 30d
 
-# Prompts that mention a topic
+# Prompts đề cập topic
 python3 prompts.py --grep "rate limit" --since 60d
 ```
 
-The typical workflow for "find patterns I could turn into global instructions":
-1. Run `prompts.py --since 30d` and read the output.
-2. Group by recurring themes (same correction repeated across projects, same setup question, same complaint).
-3. Propose additions to global `CLAUDE.md` / project AGENTS.md / pi instructions.
+Workflow điển hình cho "find patterns I could turn into global instructions":
+1. Chạy `prompts.py --since 30d` và đọc output.
+2. Group by recurring themes (cùng correction lặp qua projects, cùng setup question, cùng complaint).
+3. Đề xuất additions cho global `CLAUDE.md` / project AGENTS.md / pi instructions.
 
-### `show_session.py` — render one session as markdown
+### `show_session.py` — render một session как markdown
 
 ```bash
-# The most recent session
+# Session gần nhất
 python3 show_session.py --latest
 
-# A specific session by id prefix (8 chars is enough)
+# Session cụ thể theo id prefix (8 chars đủ unique)
 python3 show_session.py --session 019e475b
 
-# The most recent session in a project
+# Session gần nhất trong một project
 python3 show_session.py --latest --cwd /path/to/your/project
 
-# Include subagent transcripts inline below
+# Bao gồm subagent transcripts inline bên dưới
 python3 show_session.py --session 019e475b --include-subagents-content
 
-# Drop thinking entirely / show fewer chars
+# Bỏ thinking entirely / show ít chars hơn
 python3 show_session.py --session 019e475b --max-thinking -1 --max-tool-output 800
 ```
 
-Each tool result is fenced with `…[N more chars elided]…` if truncated. Default truncations: tool output 2000, assistant text 4000, thinking 600. Pass `0` to a limit to disable it, `-1` to `--max-thinking` to omit thinking entirely.
+Mỗi tool result được fenced với `…[N more chars elided]…` nếu truncated. Default truncations: tool output 2000, assistant text 4000, thinking 600. Truyền `0` cho limit để disable, `-1` cho `--max-thinking` để omit thinking hoàn toàn.
 
-### `search.py` — search across transcripts
+### `search.py` — tìm kiếm qua transcripts
 
-Substring by default, regex with `--regex` (smart-case). Searches both user and assistant text by default.
+Substring mặc định, regex với `--regex` (smart-case). Tìm cả user và assistant text mặc định.
 
 ```bash
-# Substring across everything
+# Substring qua everything
 python3 search.py "supabase RLS"
 
-# Only my prompts, last 60 days
+# Chỉ prompts của tôi, 60 ngày gần nhất
 python3 search.py "global instruction" --in user --since 60d
 
 # Regex
 python3 search.py --regex "TODO\\(.+\\)"
 
-# More context per match
+# Context nhiều hơn per match
 python3 search.py "rate limit" --context 2
 ```
 
-Each hit prints the session header plus a `python3 show_session.py --session <id>` line so you can drill in directly.
+Mỗi hit print session header плюс `python3 show_session.py --session <id>` line để bạn có thể drill in trực tiếp.
 
 ## Shared filters
 
-Available on **all four scripts**:
+Available trên **tất cả 4 scripts**:
 
 | Flag | Meaning |
 |---|---|
-| `--since WHEN` / `--until WHEN` | `YYYY-MM-DD`, ISO datetime, or relative: `7d`, `2w`, `3h`, `30m` |
-| `--cwd SUBSTR` | Substring match on the session's real `cwd`. Repeatable. |
-| `--model SUBSTR` | Substring match on model id. Repeatable. |
+| `--since WHEN` / `--until WHEN` | `YYYY-MM-DD`, ISO datetime, hoặc relative: `7d`, `2w`, `3h`, `30m` |
+| `--cwd SUBSTR` | Substring match trên session's real `cwd`. Repeatable. |
+| `--model SUBSTR` | Substring match trên model id. Repeatable. |
 | `--provider {anthropic,openai,google}` | |
-| `--session ID` | Session id or prefix (8 chars usually unique) |
-| `--include-subagents` / `--no-subagents` | Override the script default |
-| `--limit N` | Cap items returned (caps groups, not sessions, for `cost.py` group views) |
-| `--min-cost USD` | Drop sessions below this spend |
+| `--session ID` | Session id hoặc prefix (8 chars thường unique) |
+| `--include-subagents` / `--no-subagents` | Override script mặc định |
+| `--limit N` | Cap items returned (cap groups, không phải sessions, cho `cost.py` group views) |
+| `--min-cost USD` | Drop sessions dưới spend này |
 | `--min-messages N` | Drop short sessions |
-| `--errors-only` | Only sessions with at least one `toolResult.isError` |
-| `--grep SUBSTR` | Case-insensitive substring on the session's concatenated user prompts |
+| `--errors-only` | Chỉ sessions với ít nhất một `toolResult.isError` |
+| `--grep SUBSTR` | Case-insensitive substring trên session's concatenated user prompts |
 
-### Subagent defaults
-- `cost.py`: **included** (totals = real spend)
-- `prompts.py`, `show_session.py`, `search.py`: **excluded** (a subagent's "user" message is a task description written by another agent, not your prompt)
+### Subagent mặc định
+- `cost.py`: **bao gồm** (totals = real spend)
+- `prompts.py`, `show_session.py`, `search.py`: **exclude** (subagent's "user" message là task description viết bởi agent khác, không phải prompt của bạn)
 
 ## Common queries
 
 | Question | Command |
 |---|---|
-| Total cost in the last 7 days | `python3 cost.py --since 7d --by total` |
-| Daily spend trend, last 30 days | `python3 cost.py --since 30d --by day` |
-| Most expensive projects this month | `python3 cost.py --since 30d --by project --limit 10` |
-| Most expensive sessions ever | `python3 cost.py --by session --limit 10 --until 1d` |
-| Cost of one project | `python3 cost.py --cwd /path/to/proj` |
-| Patterns in my prompting | `python3 prompts.py --since 30d --max-chars 1500` → read the output |
-| What did I do yesterday | `python3 show_session.py --latest --since 1d` |
-| Where did the agent struggle | `python3 cost.py --since 30d --errors-only --by session --limit 10` |
-| Find old session about X | `python3 search.py "X"` |
+| Total cost 7 ngày gần nhất | `python3 cost.py --since 7d --by total` |
+| Daily spend trend, 30 ngày gần nhất | `python3 cost.py --since 30d --by day` |
+| Projects đắt nhất tháng này | `python3 cost.py --since 30d --by project --limit 10` |
+| Sessions đắt nhất mọi thời đại | `python3 cost.py --by session --limit 10 --until 1d` |
+| Cost của một project | `python3 cost.py --cwd /path/to/proj` |
+| Patterns trong prompting của tôi | `python3 prompts.py --since 30d --max-chars 1500` → đọc output |
+| Tôi đã làm gì yesterday | `python3 show_session.py --latest --since 1d` |
+| Agent struggled ở đâu | `python3 cost.py --since 30d --errors-only --by session --limit 10` |
+| Tìm session cũ về X | `python3 search.py "X"` |
 
 ## Notes
 
-- All paths are read-only; the scripts never modify session files.
-- The library (`scripts/sessions.py`) is reusable: import it for ad-hoc analysis.
-- A full scan over a few hundred sessions takes ~1–2 seconds. No caching.
+- Tất cả paths là read-only; scripts không bao giờ modify session files.
+- Library (`scripts/sessions.py`) reusable: import nó cho ad-hoc analysis.
+- Full scan qua vài hundred sessions mất ~1–2 seconds. Không caching.
