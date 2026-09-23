@@ -3,6 +3,7 @@ import { Type } from "typebox";
 import { Text } from "@mariozechner/pi-tui";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { URL } from "node:url";
 
 interface SearchResult {
 	title: string;
@@ -16,6 +17,7 @@ interface StructuredSearchArgs {
 	excludeTerms?: string[];
 	site?: string;
 	count?: number;
+	provider?: "duckduckgo" | "exa";
 }
 
 interface BuiltSearchQuery {
@@ -26,60 +28,158 @@ interface BuiltSearchQuery {
 	site?: string;
 }
 
-async function googleSearch(
+// ── Exa Search (requires API key) ──
+
+async function exaSearch(
 	query: string,
 	count: number,
 	apiKey: string,
-	cseId: string,
 	signal?: AbortSignal,
 ): Promise<SearchResult[]> {
 	const num = Math.min(count, 10);
-	const url = new URL("https://www.googleapis.com/customsearch/v1");
-	url.searchParams.set("key", apiKey);
-	url.searchParams.set("cx", cseId);
-	url.searchParams.set("q", query);
-	url.searchParams.set("num", String(num));
+	const url = new URL("https://api.exa.ai/search");
 
-	const resp = await fetch(url.toString(), { signal });
+	const resp = await fetch(url.toString(), {
+		method: "POST",
+		signal,
+		headers: {
+			"Content-Type": "application/json",
+			"x-api-key": apiKey,
+		},
+		body: JSON.stringify({
+			query,
+			type: "auto",
+			numResults: num,
+			contents: { highlights: true },
+		}),
+	});
+
 	if (!resp.ok) {
 		const body = await resp.text();
-		throw new Error(`Google API ${resp.status}: ${body.slice(0, 200)}`);
+		throw new Error(`Exa API ${resp.status}: ${body.slice(0, 200)}`);
 	}
 
 	const data = (await resp.json()) as {
-		items?: Array<{
-			title: string;
-			link: string;
-			snippet?: string;
+		results?: Array<{
+			title?: string;
+			url: string;
+			highlights?: string[];
+			score?: number;
 		}>;
 	};
 
-	if (!data.items || data.items.length === 0) return [];
+	if (!data.results || data.results.length === 0) return [];
 
-	return data.items.map((item) => ({
-		title: item.title,
-		url: item.link,
-		snippet: item.snippet?.replace(/\n/g, " ") ?? "",
+	return data.results.map((item) => ({
+		title: item.title ?? item.url,
+		url: item.url,
+		snippet: item.highlights?.join(" ") ?? "",
 	}));
 }
 
-const EXT_DIR = path.dirname(new URL(import.meta.url).pathname);
-const AUTH_PATH = path.join(EXT_DIR, "auth.json");
-
-function loadCredentials(): { apiKey: string; cseId: string } | null {
-	const envApiKey = process.env.GOOGLE_SEARCH_API_KEY ?? process.env.GOOGLE_API_KEY;
-	const envCseId = process.env.GOOGLE_CSE_ID ?? process.env.GOOGLE_CUSTOM_SEARCH_ENGINE_ID;
-	if (envApiKey && envCseId) return { apiKey: envApiKey, cseId: envCseId };
+function loadExaCredentials(): string | null {
+	const envKey = process.env.EXA_API_KEY;
+	if (envKey) return envKey;
 
 	if (!fs.existsSync(AUTH_PATH)) return null;
 	try {
 		const config = JSON.parse(fs.readFileSync(AUTH_PATH, "utf-8"));
-		const apiKey = config.google_search_api_key as string;
-		const cseId = config.google_cse_id as string;
-		if (apiKey && cseId) return { apiKey, cseId };
+		const key = config.exa_api_key as string;
+		if (key) return key;
 	} catch {}
 	return null;
 }
+
+// ── DuckDuckGo Search (HTML scraping, no API key needed) ──
+
+async function duckduckgoSearch(
+	query: string,
+	count: number,
+	signal?: AbortSignal,
+): Promise<SearchResult[]> {
+	const num = Math.min(count, 10);
+	const url = new URL("https://duckduckgo.com/");
+	url.searchParams.set("q", query);
+
+	const resp = await fetch(url.toString(), {
+		signal,
+		headers: {
+			"User-Agent":
+				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+			"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+			"Accept-Language": "en-US,en;q=0.9",
+		},
+	});
+
+	if (!resp.ok) {
+		throw new Error(`DuckDuckGo HTTP ${resp.status}`);
+	}
+
+	const html = await resp.text();
+
+	// Parse results from DDG HTML
+	const results: SearchResult[] = [];
+	const resultRegex = /class="result__a"[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/g;
+	let match;
+
+	while (results.length < num && (match = resultRegex.exec(html)) !== null) {
+		const rawUrl = match[1]
+			.replace(/&amp;/g, "&")
+			.replace(/&lt;/g, "<")
+			.replace(/&gt;/g, ">")
+			.replace(/&quot;/g, '"')
+			.replace(/&#x27;/g, "'");
+		// Skip DDG internal links
+		if (rawUrl.startsWith("javascript:") || rawUrl.startsWith("#")) continue;
+
+		const title = match[2].trim();
+		results.push({ title, url: rawUrl, snippet: "" });
+	}
+
+	// Try to extract snippets
+	const snippetRegex = /class="result__snippet"[^>]*>([^<]+)<\/span>/g;
+	const decodedHtml = html
+		.replace(/&amp;/g, "&")
+		.replace(/&lt;/g, "<")
+		.replace(/&gt;/g, ">")
+		.replace(/&quot;/g, '"');
+	let snippetMatch;
+	let resultIdx = 0;
+	while (results.length < num && (snippetMatch = snippetRegex.exec(decodedHtml)) !== null) {
+		if (resultIdx < results.length) {
+			results[resultIdx].snippet = snippetMatch[1].trim();
+			resultIdx++;
+		}
+	}
+
+	// Fallback: if no results from regex, try to find links in result divs
+	if (results.length === 0) {
+		const divRegex = /class="result[^"]*"[^>]*>(.*?)<\/div>\s*<div/g;
+		const linkRegex = /href="([^"]+)"/g;
+		const textRegex = /<[^>]+>/g;
+
+		let divMatch;
+		while (results.length < num && (divMatch = divRegex.exec(html)) !== null) {
+			const divContent = divMatch[1];
+			let linkMatch;
+			while ((linkMatch = linkRegex.exec(divContent)) !== null) {
+				const rawUrl = linkMatch[1]
+					.replace(/&amp;/g, "&")
+					.replace(/&lt;/g, "<")
+					.replace(/&gt;/g, ">");
+				if (rawUrl.startsWith("javascript:") || rawUrl.startsWith("#") || rawUrl.includes("duckduckgo.com")) continue;
+				const textOnly = divContent.replace(textRegex, "").trim().slice(0, 200);
+				results.push({ title: textOnly.slice(0, 80), url: rawUrl, snippet: textOnly });
+				break;
+			}
+		}
+	}
+
+	return results;
+}
+
+const EXT_DIR = path.dirname(new URL(import.meta.url).pathname);
+const AUTH_PATH = path.join(EXT_DIR, "auth.json");
 
 function formatResults(results: SearchResult[]): string {
 	if (results.length === 0) return "No results found.";
@@ -166,12 +266,13 @@ export default function (pi: ExtensionAPI) {
 		name: "web_search",
 		label: "Web Search",
 		description:
-			"Search the web via Google Custom Search API. Build one search per call from a base query string, exact phrases, exclusions, and an optional site. Returns title, URL, and snippet.",
+			"Search the web via DuckDuckGo (default) or Exa (semantic search with AI highlights). Build one search per call from a base query string, exact phrases, exclusions, and an optional site. Returns title, URL, and snippet.",
 		promptSnippet:
 			"Search the web via a query string plus optional exactPhrases, excludeTerms, and site. Use one tool call per search angle.",
 		promptGuidelines: [
 			"Use exactPhrases for exact phrase matching instead of embedding quote marks inside the main query string.",
 			"Use one web_search tool call per search angle instead of batching multiple searches into one call.",
+			"Default provider is DuckDuckGo (no API key needed). Use provider: 'exa' for AI-powered semantic search with highlights (requires EXA_API_KEY)."
 		],
 
 		parameters: Type.Object({
@@ -184,7 +285,7 @@ export default function (pi: ExtensionAPI) {
 			exactPhrases: Type.Optional(
 				Type.Array(Type.String(), {
 					description:
-						"Exact phrases to match. Each item becomes a quoted phrase in the final Google query.",
+						"Exact phrases to match. Each item becomes a quoted phrase in the final query.",
 				}),
 			),
 			excludeTerms: Type.Optional(
@@ -206,25 +307,34 @@ export default function (pi: ExtensionAPI) {
 					maximum: 10,
 				}),
 			),
+			provider: Type.Optional(
+				Type.Union([
+					Type.Literal("duckduckgo"),
+					Type.Literal("exa"),
+				], {
+					description: "Search provider: 'duckduckgo' (default, no API key) or 'exa' (semantic search with highlights, requires EXA_API_KEY)",
+				}),
+			),
 		}),
 
 		async execute(_toolCallId, params: StructuredSearchArgs, signal) {
-			const creds = loadCredentials();
-			if (!creds) {
-				throw new Error(
-					`Missing Google Custom Search credentials. Set GOOGLE_SEARCH_API_KEY and GOOGLE_CSE_ID, or create ${AUTH_PATH} from auth.example.json. Get credentials from https://developers.google.com/custom-search/v1/introduction`,
-				);
-			}
-
 			const count = params.count ?? 5;
 			const built = buildSearchQuery(params);
-			const results = await googleSearch(
-				built.query,
-				count,
-				creds.apiKey,
-				creds.cseId,
-				signal,
-			);
+
+			let results: SearchResult[];
+			const provider = params.provider ?? "duckduckgo";
+
+			if (provider === "exa") {
+				const apiKey = loadExaCredentials();
+				if (!apiKey) {
+					throw new Error(
+						`Exa provider selected but no API key found. Set EXA_API_KEY environment variable or add exa_api_key to auth.json. Get key at https://exa.ai/`,
+					);
+				}
+				results = await exaSearch(built.query, count, apiKey, signal);
+			} else {
+				results = await duckduckgoSearch(built.query, count, signal);
+			}
 
 			return {
 				content: [
@@ -239,6 +349,7 @@ export default function (pi: ExtensionAPI) {
 					exactPhrases: built.exactPhrases,
 					excludeTerms: built.excludeTerms,
 					site: built.site,
+					provider,
 					resultCount: results.length,
 				},
 			};
@@ -248,7 +359,7 @@ export default function (pi: ExtensionAPI) {
 			const text =
 				(context.lastComponent as Text | undefined) ??
 				new Text("", 0, 0);
-			const { count, ...searchArgs } = args as StructuredSearchArgs;
+			const { count, provider, ...searchArgs } = args as StructuredSearchArgs;
 
 			try {
 				const built = buildSearchQuery(searchArgs);
@@ -260,6 +371,9 @@ export default function (pi: ExtensionAPI) {
 					theme.fg("toolTitle", theme.bold("search ")) +
 						theme.fg("accent", `"${display}"`),
 				];
+				if (provider && provider !== "duckduckgo") {
+					lines.push(theme.fg("dim", `  provider: ${provider}`));
+				}
 				if (count && count !== 5) {
 					lines.push(theme.fg("dim", `  count: ${count}`));
 				}
@@ -295,13 +409,17 @@ export default function (pi: ExtensionAPI) {
 			const details = result.details as {
 				composedQuery?: string;
 				resultCount?: number;
+				provider?: string;
 			};
 			const status = theme.fg(
 				"success",
 				`${details?.resultCount ?? 0} results`,
 			);
 			if (!expanded) {
-				text.setText(status);
+				const providerLabel = details?.provider && details.provider !== "duckduckgo"
+					? theme.fg("dim", ` (${details.provider})`)
+					: "";
+				text.setText(status + providerLabel);
 				return text;
 			}
 

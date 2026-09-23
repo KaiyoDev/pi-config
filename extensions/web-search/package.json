@@ -1,0 +1,12 @@
+{
+  "name": "pi-web-search",
+  "version": "1.0.0",
+  "description": "Web search extension for pi with DuckDuckGo, Exa, and Google providers",
+  "type": "module",
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "dependencies": {
+    "exa-js": "^2.19.0"
+  }
+}
