@@ -3,10 +3,11 @@
 Bản đồng bộ **2026-09-23** từ `~/.pi/agent/npm/package.json` (live), chỉ giữ các package
 cung cấp tool/skill đang dùng thật. Version range giữ nguyên như live.
 
-## Gồm 7 package
+## Gồm 8 package
 
 | Package | Vai trò |
 |---|---|
+| `pi-atelier` | Status rail + live activity sidebar responsive cho pi (UI)
 | `pi-herdsman` | Orchestration agent: tool `agent` (delegate/steer/inspect...), định nghĩa agent scout/researcher/implementer/reviewer/generalist, tool `chief`/`peer` |
 | `pi-subagents` | Tool `subagent` (1-child + workflow script), council-mode, `subagent_supervisor`, skill `pi-subagents`/`council-mode` |
 | `pi-btw` | Skill `btw` — side-conversation song song |
@@ -32,9 +33,9 @@ npm install
 Lưu ý: `pi-mcp-adapter` cần config MCP servers (stitch, soralabs, shadcn, codebase-memory...)
 nằm ở `~/.pi/agent/mcp.json` — file này KHÔNG nằm trong repo (chứa endpoint/key riêng).
 
-## Cố tình không lấy (9 package UI/thí nghiệm khác trong live)
+## Cố tình không lấy (8 package UI/thí nghiệm khác trong live)
 
-`pi-atelier`, `pi-cache-graph`, `pi-context-view`, `pi-custom-system-prompt`,
+`pi-cache-graph`, `pi-context-view`, `pi-custom-system-prompt`,
 `pi-extmgr`, `pi-tool-repair`, `pi-warden`, `@narumitw/pi-usage`, `@pify/pretty`.
 
 Cần cái nào thì thêm vào `package.json` ở đây (version xem trong live `~/.pi/agent/npm`).

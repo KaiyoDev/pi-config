@@ -1,9 +1,10 @@
 {
   "name": "pi-extensions",
   "private": true,
-  "description": "Chọn lọc các pi extension npm quan trọng (sync từ ~/.pi/agent/npm, 2026-09-23). Cài: copy thư mục này vào ~/.pi/agent/npm rồi npm install.",
+  "description": "Tập chọn các pi extension npm (sync từ ~/.pi/agent/npm, 2026-09-23; 8 package). Cài: copy thư mục này vào ~/.pi/agent/npm rồi npm install.",
   "dependencies": {
     "@plannotator/pi-extension": "^0.27.18",
+    "pi-atelier": "^0.11.0",
     "pi-btw": "^0.6.0",
     "pi-goal-x": "^0.31.8",
     "pi-herdsman": "^0.13.0",
